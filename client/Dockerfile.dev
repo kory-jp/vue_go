@@ -1,5 +1,4 @@
 FROM node:18-alpine3.16
 
 WORKDIR /app/client
-RUN apk update && \
-  npm install -g npm @vue/cli
+RUN yarn global add @vue/cli

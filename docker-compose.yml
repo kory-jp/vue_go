@@ -8,7 +8,7 @@ services:
     environment:
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: react_golang_mux
+      MYSQL_DATABASE: vue_go
       TZ: 'Asia/Tokyo'
     volumes:
       - ./mysql/initdb.d:/docker-entrypoint-initdb.d
@@ -17,19 +17,20 @@ services:
       - ./mysql/logs:/var/log/mysql
     ports:
       - 3306:3306
-  # client:
-  #   build:
-  #     # ?Git位置を指定
-  #     context: ./client/
-  #     # dockerfileの位置を指定
-  #     dockerfile: Dockerfile.dev
-  #   container_name: react_container
-  #   tty: true
-  #   volumes:
-  #   - ./client:/app/client
-  #   # command: sh -c "cd assets && yarn install && yarn serve"
-  #   ports:
-  #     - 3000:3000
+  client:
+    build:
+      # ?Git位置を指定
+      context: ./client/
+      # dockerfileの位置を指定
+      dockerfile: Dockerfile.dev
+    container_name: vue_container
+    volumes:
+    - ./client:/app/client
+    command: sh -c "cd client-app && yarn install && yarn dev"
+    stdin_open: true
+    tty: true
+    ports:
+      - 3000:3000
 
   api:
     build:
@@ -60,4 +61,4 @@ services:
       - ./nginx/nginx_dev.conf:/etc/nginx/nginx.conf
     depends_on:
       - api
-      # - client
+      - client
