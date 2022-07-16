@@ -1,0 +1,64 @@
+version: '3'
+services:
+  mysql:
+    build:
+      context: ./mysql/
+      dockerfile: Dockerfile.dev
+    container_name: mysql_container
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vue_go
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/mysql_data:/var/lib/mysql
+      - ./mysql/logs:/var/log/mysql
+    ports:
+      - 3306:3306
+  client:
+    build:
+      # ?Git位置を指定
+      context: ./client/
+      # dockerfileの位置を指定
+      dockerfile: Dockerfile.dev
+    container_name: vue_container
+    volumes:
+    - ./client:/app/client
+    command: sh -c "cd client-app && yarn install && yarn dev"
+    stdin_open: true
+    tty: true
+    ports:
+      - 3000:3000
+
+  api:
+    build:
+      context: ./api/
+      dockerfile: Dockerfile.dev
+    container_name: go_container
+    volumes:
+      - ./api:/app/api
+    ports:
+      - 8000:8000
+      - 2345:2345
+    depends_on:
+      - mysql
+    tty: true
+    security_opt:
+      - apparmor:unconfined
+    cap_add:
+      - SYS_PTRACE
+
+  nginx:
+    image: nginx
+    container_name:  nginx_container
+    ports:
+      - 80:80
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./nginx/nginx_dev.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
+      - client
