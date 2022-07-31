@@ -2,3 +2,7 @@ mysql/logs/*
 mysql/mysql_data/*
 
 api/tmp/*
+api/env/*
+
+memo.txt
+*dio
