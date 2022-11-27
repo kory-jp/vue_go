@@ -1,7 +1,8 @@
 <template>
   <div>
     <h1>{{ msg }}</h1>
-    <p>"All right?"</p>
+    <p>"All right??"</p>
+    <router-link to="/top">to Top</router-link>
   </div>
 </template>
 
