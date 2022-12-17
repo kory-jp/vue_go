@@ -1,7 +1,7 @@
 <template>
   <div>
     <p>TOP</p>
-    <router-link to="/">to Hello</router-link>
+    <router-link to="/login">ログインページへ</router-link>
   </div>
 </template>
 
