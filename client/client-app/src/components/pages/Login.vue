@@ -1,6 +1,10 @@
 <template>
-  <div>
-    <p class="text-sky-400 font-bold">ログイン</p>
+  <div class="bg-gray-200 box-border h-32 w-32">
+    <h2 class="font-bold">ログイン!</h2>
+    <div>
+      <input type="text">
+      <input type="text">
+    </div>
     <router-link to="/">トップページへ</router-link>
   </div>
 </template>
