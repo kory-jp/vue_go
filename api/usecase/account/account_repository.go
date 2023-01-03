@@ -1,4 +1,4 @@
-package account
+package usecase
 
 import (
 	"github.com/kory-jp/vue_go/api/domain"
