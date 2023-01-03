@@ -4,5 +4,7 @@ mysql/mysql_data/*
 api/tmp/*
 api/env/*
 
+client/client-app/.env.*
+
 memo.txt
 *dio
