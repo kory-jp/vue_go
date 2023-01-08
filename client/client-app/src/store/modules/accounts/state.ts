@@ -1,17 +1,11 @@
-export class Account {
-  signIn = false;
-  id = "";
-  name = "hello";
-  email = "";
-  password = "";
-}
+import { Account } from "@/store/types";
 
-export interface State {
-  account: Account;
-}
-
-const state: State = {
-  account: new Account()
+const state: Account = {
+  id: 0,
+  name: '',
+  email: '',
+  password: '',
+  signIn: false,
 }
 
 export default state;

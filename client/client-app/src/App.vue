@@ -10,7 +10,6 @@
 import HelloWorld from './components/HelloWorld.vue';
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import Top from '@/components/pages/Top.vue'
-console.log("OK?")
 @Component({
   components: {
     HelloWorld,

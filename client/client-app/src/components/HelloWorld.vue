@@ -9,8 +9,6 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-
-console.log("child OK?")
 @Component({
   name: 'HelloWorld'
 })
