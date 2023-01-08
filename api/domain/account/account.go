@@ -57,3 +57,13 @@ func (ac *Account) AccountValidate() (err error) {
 	}
 	return err
 }
+
+func (ac *Account) CheckExistEmail(numberAccount int, err error) error {
+	if err != nil {
+		return err
+	}
+	if numberAccount > 0 {
+		return errors.New("入力されたメールアドレスは既に登録されております")
+	}
+	return nil
+}

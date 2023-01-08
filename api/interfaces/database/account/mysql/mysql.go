@@ -22,3 +22,12 @@ var FindAccountState = `
 		where
 			id = ?
 `
+
+var GetNumberAccountState = `
+	select
+		count(*)
+	from
+		account
+	where
+		email = ?
+`
