@@ -6,9 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 
-	"github.com/kory-jp/vue_go/api/domain"
+	domain "github.com/kory-jp/vue_go/api/domain/account"
 	"github.com/kory-jp/vue_go/api/interfaces/database"
 	account "github.com/kory-jp/vue_go/api/interfaces/database/account"
 	usecase "github.com/kory-jp/vue_go/api/usecase/account"
@@ -67,10 +66,7 @@ func (controller *AccountController) Create(w http.ResponseWriter, r *http.Reque
 	}
 	account, err := controller.Interactor.Add(*accountType)
 	if err != nil {
-		errStr := err.Error()
-		errStr1 := strings.Replace(errStr, "Error 1062: Duplicate entry", "入力された", 1)
-		errStr2 := strings.Replace(errStr1, "for key 'email'", "既に登録されています。", 1)
-		resStr := new(Response).SetResp(400, errStr2, nil)
+		resStr := new(Response).SetResp(400, err.Error(), nil)
 		fmt.Println(err)
 		log.Println(err)
 		fmt.Fprintln(w, resStr)

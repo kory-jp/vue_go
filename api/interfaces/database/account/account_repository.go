@@ -7,7 +7,7 @@ import (
 
 	"github.com/kory-jp/vue_go/api/interfaces/database/account/mysql"
 
-	"github.com/kory-jp/vue_go/api/domain"
+	domain "github.com/kory-jp/vue_go/api/domain/account"
 	"github.com/kory-jp/vue_go/api/interfaces/database"
 )
 
@@ -61,4 +61,23 @@ func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, e
 		CreatedAt: created_at,
 	}
 	return user, nil
+}
+
+func (repo *AccountRepository) FindByEmail(email string) (numberAccount int, err error) {
+	// TODO: rowの詳細を確認
+	row, err := repo.Query(mysql.GetNumberAccountState, email)
+	if err != nil {
+		fmt.Println(err)
+		log.Println(err)
+		return 0, err
+	}
+	defer row.Close()
+	row.Next()
+	err = row.Scan(&numberAccount)
+	if err != nil {
+		fmt.Println(err)
+		log.Println(err)
+		return 0, err
+	}
+	return numberAccount, nil
 }
