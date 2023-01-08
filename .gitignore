@@ -8,3 +8,5 @@ client/client-app/.env.*
 
 memo.txt
 *dio
+
+*.log

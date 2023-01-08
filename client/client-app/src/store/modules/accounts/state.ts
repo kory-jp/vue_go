@@ -1,7 +1,7 @@
 import { Account } from "@/store/types";
 
 const state: Account = {
-  id: '',
+  id: 0,
   name: '',
   email: '',
   password: '',

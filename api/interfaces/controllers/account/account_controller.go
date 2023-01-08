@@ -49,7 +49,7 @@ func (controller *AccountController) Create(w http.ResponseWriter, r *http.Reque
 		fmt.Fprintln(w, resStr)
 		return
 	}
-	bytesUser, err := io.ReadAll(r.Body)
+	bytesAccount, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(err)
 		log.Println(err)
@@ -58,7 +58,7 @@ func (controller *AccountController) Create(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	accountType := new(domain.Account)
-	if err := json.Unmarshal(bytesUser, accountType); err != nil {
+	if err := json.Unmarshal(bytesAccount, accountType); err != nil {
 		fmt.Println(err)
 		log.Println(err)
 		resStr := new(Response).SetResp(400, "データ取得に失敗しました", nil)
@@ -71,6 +71,8 @@ func (controller *AccountController) Create(w http.ResponseWriter, r *http.Reque
 		errStr1 := strings.Replace(errStr, "Error 1062: Duplicate entry", "入力された", 1)
 		errStr2 := strings.Replace(errStr1, "for key 'email'", "既に登録されています。", 1)
 		resStr := new(Response).SetResp(400, errStr2, nil)
+		fmt.Println(err)
+		log.Println(err)
 		fmt.Fprintln(w, resStr)
 		return
 	}

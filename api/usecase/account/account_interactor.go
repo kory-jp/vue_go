@@ -13,7 +13,7 @@ type AccountInteractor struct {
 }
 
 func (interactor *AccountInteractor) Add(ac domain.Account) (account *domain.Account, err error) {
-	if err = ac.UserValidate(); err == nil {
+	if err = ac.AccountValidate(); err == nil {
 		ac.Password = ac.Encrypt(ac.Password)
 		identifier, err := interactor.AccountRepository.Store(ac)
 		if err != nil {

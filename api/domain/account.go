@@ -36,7 +36,7 @@ func (ac Account) TranslateUsersField(field string) (value string) {
 	return
 }
 
-func (ac *Account) UserValidate() (err error) {
+func (ac *Account) AccountValidate() (err error) {
 	validate := validator.New()
 	err = validate.Struct(ac)
 

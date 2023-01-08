@@ -19,8 +19,8 @@
   </div>
 </template>
 <script lang="ts">
-import { Account } from "@/store/types";
 import { Component, Prop, Vue } from "vue-property-decorator";
+import { Account } from "../../../store/types";
   @Component
   export default class Login extends Vue{
     name = '';
@@ -28,7 +28,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
     password = '';
     registerAccount() {
       const account: Account = {
-        id: "",
+        id: 0,
         name: this.name,
         email: this.email,
         password: this.password,
