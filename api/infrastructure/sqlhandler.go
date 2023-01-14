@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/pkg/errors"
+
 	"github.com/kory-jp/vue_go/api/infrastructure/mysql"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -27,21 +29,20 @@ func NewSqlHandler() *SqlHandler {
 	)
 	conn, err := sql.Open(config.Config.SQLDriver, DSN)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
+		errors.New(err.Error())
 	}
 	errP := conn.Ping()
 	if errP != nil {
-		fmt.Println("データベース接続失敗")
+		log.Println("データベース接続失敗")
 	} else {
-		fmt.Println("データベース接続成功")
+		log.Println("データベース接続成功")
 	}
 
 	query := mysql.Query()
 	for i := 0; i < len(query); i++ {
 		_, err := conn.Exec(query[i])
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 	}
 	sqlHandler := new(SqlHandler)
@@ -61,9 +62,7 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	res := SqlResult{}
 	result, err := handler.Conn.Exec(statement, args...)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		return res, err
+		return nil, errors.New(err.Error())
 	}
 	res.Result = result
 	return res, nil
@@ -72,9 +71,7 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Row, error) {
 	rows, err := handler.Conn.Query(statement, args...)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		return new(SqlRow), err
+		return nil, errors.New(err.Error())
 	}
 	row := new(SqlRow)
 	row.Rows = rows
@@ -84,19 +81,17 @@ func (handler *SqlHandler) Query(statement string, args ...interface{}) (databas
 func (handler *SqlHandler) DoInTx(f func(tx *sql.Tx) (interface{}, error)) (interface{}, error) {
 	tx, err := handler.Conn.Begin()
 	if err != nil {
-		fmt.Println(err)
-		log.Panicln(err)
-		return nil, err
+		return nil, errors.New(err.Error())
 	}
 
 	v, err := f(tx)
 	if err != nil {
 		tx.Rollback()
-		return nil, err
+		return nil, errors.New(err.Error())
 	}
 	if err := tx.Commit(); err != nil {
 		tx.Rollback()
-		return nil, err
+		return nil, errors.New(err.Error())
 	}
 	return v, nil
 }
@@ -105,9 +100,7 @@ func (handler *SqlHandler) TransExecute(tx *sql.Tx, statement string, args ...in
 	res := SqlResult{}
 	result, err := tx.Exec(statement, args...)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		return res, err
+		return res, errors.New(err.Error())
 	}
 	res.Result = result
 	return res, nil

@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	domain "github.com/kory-jp/vue_go/api/domain/account"
@@ -17,19 +15,6 @@ type AccountController struct {
 	Interactor usecase.AccountInteractor
 }
 
-type Response struct {
-	Status  int             `json:"status"`
-	Message string          `json:"message"`
-	Account *domain.Account `json:"account"`
-}
-
-func (res *Response) SetResp(status int, mess string, account *domain.Account) (resStr string) {
-	response := &Response{status, mess, account}
-	r, _ := json.Marshal(response)
-	resStr = string(r)
-	return
-}
-
 func NewAccountController(sqlHandler database.SqlHandler) *AccountController {
 	return &AccountController{
 		Interactor: usecase.AccountInteractor{
@@ -40,39 +25,21 @@ func NewAccountController(sqlHandler database.SqlHandler) *AccountController {
 	}
 }
 
-func (controller *AccountController) Create(w http.ResponseWriter, r *http.Request) {
+func (controller *AccountController) Create(r *http.Request) (status int, message string, body interface{}, err error) {
 	if r.ContentLength == 0 {
-		fmt.Println("NO DATA BODY")
-		log.Println("NO DATA BODY")
-		resStr := new(Response).SetResp(400, "データ取得に失敗しました", nil)
-		fmt.Fprintln(w, resStr)
-		return
+		return 400, "データ取得に失敗しました", nil, nil
 	}
 	bytesAccount, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		resStr := new(Response).SetResp(400, "データ取得に失敗しました", nil)
-		fmt.Fprintln(w, resStr)
-		return
+		return 400, "データ取得に失敗しました", nil, err
 	}
 	accountType := new(domain.Account)
 	if err := json.Unmarshal(bytesAccount, accountType); err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		resStr := new(Response).SetResp(400, "データ取得に失敗しました", nil)
-		fmt.Fprintln(w, resStr)
-		return
+		return 400, "データ取得に失敗しました", nil, err
 	}
 	account, err := controller.Interactor.Add(*accountType)
 	if err != nil {
-		resStr := new(Response).SetResp(400, err.Error(), nil)
-		fmt.Println(err)
-		log.Println(err)
-		fmt.Fprintln(w, resStr)
-		return
+		return 400, err.Error(), nil, err
 	}
-
-	resStr := new(Response).SetResp(200, "新規登録完了しました", account)
-	fmt.Fprintln(w, resStr)
+	return 200, "新規登録完了しました", account, nil
 }
