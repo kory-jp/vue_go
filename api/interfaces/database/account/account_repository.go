@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-	"log"
 	"time"
 
 	"github.com/kory-jp/vue_go/api/interfaces/database/account/mysql"
@@ -18,14 +16,10 @@ type AccountRepository struct {
 func (repo *AccountRepository) Store(ac domain.Account) (id int, err error) {
 	result, err := repo.Execute(mysql.CreateAccountState, ac.Name, ac.Email, ac.Password)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return 0, err
 	}
 	id64, err := result.LastInsertId()
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return 0, err
 	}
 	id = int(id64)
@@ -35,8 +29,6 @@ func (repo *AccountRepository) Store(ac domain.Account) (id int, err error) {
 func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, err error) {
 	row, err := repo.Query(mysql.FindAccountState, identifier)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return nil, err
 	}
 	defer row.Close()
@@ -49,8 +41,6 @@ func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, e
 	)
 	row.Next()
 	if err = row.Scan(&id, &name, &email, &password, &created_at); err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return nil, err
 	}
 	user = &domain.Account{
@@ -67,16 +57,12 @@ func (repo *AccountRepository) FindByEmail(email string) (numberAccount int, err
 	// TODO: rowの詳細を確認
 	row, err := repo.Query(mysql.GetNumberAccountState, email)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return 0, err
 	}
 	defer row.Close()
 	row.Next()
 	err = row.Scan(&numberAccount)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return 0, err
 	}
 	return numberAccount, nil
