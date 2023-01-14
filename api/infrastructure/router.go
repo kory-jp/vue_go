@@ -27,7 +27,6 @@ func (res *Response) setResp(w http.ResponseWriter, r *http.Request, handler fun
 		if e, ok := err.(fmt.Formatter); ok {
 			log.Printf("[ERROR]: %+v\n\n", e)
 		}
-		log.Println(err)
 	}
 	response := &Response{status, mess, body}
 	jsonData, _ := json.Marshal(response)

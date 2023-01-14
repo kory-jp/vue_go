@@ -3,6 +3,8 @@ package database
 import (
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/kory-jp/vue_go/api/interfaces/database/account/mysql"
 
 	domain "github.com/kory-jp/vue_go/api/domain/account"
@@ -20,7 +22,7 @@ func (repo *AccountRepository) Store(ac domain.Account) (id int, err error) {
 	}
 	id64, err := result.LastInsertId()
 	if err != nil {
-		return 0, err
+		return 0, errors.New(err.Error())
 	}
 	id = int(id64)
 	return id, nil
@@ -63,7 +65,7 @@ func (repo *AccountRepository) FindByEmail(email string) (numberAccount int, err
 	row.Next()
 	err = row.Scan(&numberAccount)
 	if err != nil {
-		return 0, err
+		return 0, errors.New(err.Error())
 	}
 	return numberAccount, nil
 }
