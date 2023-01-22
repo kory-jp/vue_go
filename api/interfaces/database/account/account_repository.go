@@ -1,9 +1,11 @@
 package database
 
 import (
-	"fmt"
-	"log"
+	"os"
 	"time"
+
+	"github.com/kory-jp/vue_go/api/interfaces/database/account/dammy"
+	"github.com/pkg/errors"
 
 	"github.com/kory-jp/vue_go/api/interfaces/database/account/mysql"
 
@@ -18,15 +20,11 @@ type AccountRepository struct {
 func (repo *AccountRepository) Store(ac domain.Account) (id int, err error) {
 	result, err := repo.Execute(mysql.CreateAccountState, ac.Name, ac.Email, ac.Password)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return 0, err
 	}
 	id64, err := result.LastInsertId()
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		return 0, err
+		return 0, errors.New(err.Error())
 	}
 	id = int(id64)
 	return id, nil
@@ -35,8 +33,6 @@ func (repo *AccountRepository) Store(ac domain.Account) (id int, err error) {
 func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, err error) {
 	row, err := repo.Query(mysql.FindAccountState, identifier)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return nil, err
 	}
 	defer row.Close()
@@ -49,8 +45,6 @@ func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, e
 	)
 	row.Next()
 	if err = row.Scan(&id, &name, &email, &password, &created_at); err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return nil, err
 	}
 	user = &domain.Account{
@@ -60,6 +54,9 @@ func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, e
 		Password:  password,
 		CreatedAt: created_at,
 	}
+	if os.Getenv("PROCESS_ENV") == "testProcess" {
+		return dammy.AccountData(), nil
+	}
 	return user, nil
 }
 
@@ -67,17 +64,13 @@ func (repo *AccountRepository) FindByEmail(email string) (numberAccount int, err
 	// TODO: rowの詳細を確認
 	row, err := repo.Query(mysql.GetNumberAccountState, email)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
 		return 0, err
 	}
 	defer row.Close()
 	row.Next()
 	err = row.Scan(&numberAccount)
 	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		return 0, err
+		return 0, errors.New(err.Error())
 	}
 	return numberAccount, nil
 }

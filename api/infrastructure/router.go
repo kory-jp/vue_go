@@ -1,6 +1,9 @@
 package infrastructure
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -12,7 +15,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Response struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Body    interface{} `json:"body"`
+}
+
+func (res *Response) setResp(w http.ResponseWriter, r *http.Request, handler func(r *http.Request) (status int, message string, body interface{}, err error)) {
+	status, mess, body, err := handler(r)
+	if err != nil {
+		if e, ok := err.(fmt.Formatter); ok {
+			log.Printf("[ERROR]: %+v\n\n", e)
+		}
+	}
+	response := &Response{status, mess, body}
+	jsonData, _ := json.Marshal(response)
+	resStr := string(jsonData)
+	fmt.Fprintln(w, resStr)
+}
+
 func Init() {
+	log.SetFlags(log.Ltime | log.Llongfile)
 	accountController := account.NewAccountController(NewSqlHandler())
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
@@ -28,7 +51,7 @@ func Init() {
 		})
 	})
 	r.POST("/register", func(c *gin.Context) {
-		accountController.Create(c.Writer, c.Request)
+		new(Response).setResp(c.Writer, c.Request, accountController.Create)
 	})
 	r.Run(":8000")
 }
