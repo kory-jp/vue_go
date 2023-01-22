@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/go-playground/validator"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"

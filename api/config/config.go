@@ -19,6 +19,8 @@ type ConfigList struct {
 	DBHost    string
 	DBPort    string
 	DBName    string
+	RedisHost string
+	RedisPort string
 }
 
 var Config ConfigList
@@ -37,10 +39,17 @@ func LoadConfig() {
 			log.Panicln(err)
 		}
 	} else if env == "development" {
-		err := godotenv.Load("env/development.env")
-		if err != nil {
-			log.Println(err)
-			log.Panicln(err)
+		err1 := godotenv.Load("env/development.env")
+		if err1 != nil {
+			currentDir, _ := os.Getwd()
+			if currentDir == "/app/api/infrastructure/store" {
+				err2 := godotenv.Load("/app/api/env/development.env")
+				if err2 != nil {
+					log.Println(err1)
+					log.Println(err2)
+					log.Panicln(err1)
+				}
+			}
 		}
 	}
 
@@ -54,5 +63,7 @@ func LoadConfig() {
 		DBHost:    os.Getenv("HOST"),
 		DBPort:    os.Getenv("DB_PORT"),
 		DBName:    os.Getenv("DB_NAME"),
+		RedisHost: os.Getenv("REDIS_HOST"),
+		RedisPort: os.Getenv("REDIS_PORT"),
 	}
 }

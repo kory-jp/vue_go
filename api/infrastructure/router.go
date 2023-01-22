@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	account "github.com/kory-jp/vue_go/api/interfaces/controllers/account"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
@@ -36,6 +36,11 @@ func (res *Response) setResp(w http.ResponseWriter, r *http.Request, handler fun
 
 func Init() {
 	log.SetFlags(log.Ltime | log.Llongfile)
+	// cxt := context.Background()
+	// kvs, err := store.NewKVS(ctx)
+	// if err != nil {
+	// 	log.Printf("[ERROR]: %+v", err)
+	// }
 	accountController := account.NewAccountController(NewSqlHandler())
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{

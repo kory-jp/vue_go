@@ -3,6 +3,7 @@ mysql/mysql_data/*
 
 api/tmp/*
 api/env/*
+api/vendor
 
 client/client-app/.env.*
 
@@ -10,3 +11,7 @@ memo.txt
 *dio
 
 *.log
+
+*.rdb
+
+api/infrastructure/auth/cert/*
