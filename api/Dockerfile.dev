@@ -3,7 +3,7 @@ FROM golang:1.18.3-alpine
 WORKDIR /app/api
 COPY ./ /app/api
 RUN export GOPATH= && export GO111MODULE=on
-ENV GO_ENV developemnt
+ENV GO_ENV development
 RUN apk upgrade --update && \
   apk --no-cache add git gcc musl-dev
 # RUN go install github.com/go-sql-driver/mysql@latest && \
