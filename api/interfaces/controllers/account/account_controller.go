@@ -13,13 +13,16 @@ import (
 	usecase "github.com/kory-jp/vue_go/api/usecase/account"
 )
 
+// type AccountController struct {
+// 	Interactor usecase.AccountInteractor
+// }
 type AccountController struct {
-	Interactor usecase.AccountInteractor
+	Interactor AccountInteractor
 }
 
 func NewAccountController(sqlHandler database.SqlHandler) *AccountController {
 	return &AccountController{
-		Interactor: usecase.AccountInteractor{
+		Interactor: &usecase.AccountInteractor{
 			AccountRepository: &account.AccountRepository{
 				SqlHandler: sqlHandler,
 			},
