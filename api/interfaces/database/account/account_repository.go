@@ -1,7 +1,10 @@
 package database
 
 import (
+	"os"
 	"time"
+
+	"github.com/kory-jp/vue_go/api/interfaces/database/account/dammy"
 
 	"github.com/kory-jp/vue_go/api/interfaces/database/account/mysql"
 
@@ -49,6 +52,9 @@ func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, e
 		Email:     email,
 		Password:  password,
 		CreatedAt: created_at,
+	}
+	if os.Getenv("PROCESS_ENV") == "testProcess" {
+		return dammy.AccountData(), nil
 	}
 	return user, nil
 }
