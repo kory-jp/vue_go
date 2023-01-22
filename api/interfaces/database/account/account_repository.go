@@ -1,11 +1,11 @@
 package database
 
 import (
-	"errors"
 	"os"
 	"time"
 
 	"github.com/kory-jp/vue_go/api/interfaces/database/account/dammy"
+	"github.com/pkg/errors"
 
 	"github.com/kory-jp/vue_go/api/interfaces/database/account/mysql"
 
