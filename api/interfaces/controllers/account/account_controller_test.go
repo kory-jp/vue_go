@@ -55,12 +55,16 @@ func TestCreateDebug(t *testing.T) {
 	// --- FindByEmail ---
 	mock.EXPECT().Next().Return(true)
 	mock.EXPECT().Scan(&expectNumber).Return(nil)
+	mock.EXPECT().Next().Return(false)
+	mock.EXPECT().Err().Return(nil)
 	defer mock.EXPECT().Close().Return(nil)
 	sqlhandler.EXPECT().Query(mysql.GetNumberAccountState, ac.Email).Return(mock, err)
 	// --- FindById ---
 	defer mock2.EXPECT().Close().Return(nil)
 	mock2.EXPECT().Next().Return(true)
 	mock2.EXPECT().Scan(&id, &name, &email, &password, &created_at).Return(nil)
+	mock2.EXPECT().Next().Return(false)
+	mock2.EXPECT().Err().Return(nil)
 	sqlhandler.EXPECT().Query(mysql.FindAccountState, 1).Return(mock2, nil)
 	status, message, body, err := ctrl.Create(req)
 	if err != nil {
