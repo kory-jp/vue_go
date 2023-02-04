@@ -36,7 +36,7 @@ func LoadConfig() {
 			log.Println(err)
 			log.Panicln(err)
 		}
-	} else {
+	} else if env == "development" {
 		err := godotenv.Load("env/development.env")
 		if err != nil {
 			log.Println(err)

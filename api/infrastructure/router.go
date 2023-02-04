@@ -50,7 +50,7 @@ func Init() {
 			"message": "Hello World",
 		})
 	})
-	r.POST("/register", func(c *gin.Context) {
+	r.POST("/api/register", func(c *gin.Context) {
 		new(Response).setResp(c.Writer, c.Request, accountController.Create)
 	})
 	r.Run(":8000")
