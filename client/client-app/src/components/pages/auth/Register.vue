@@ -20,7 +20,7 @@
 </template>
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { Account } from "../../../store/types";
+import { Account } from '@/store/types';
   @Component
   export default class Login extends Vue{
     name = '';
@@ -34,7 +34,6 @@ import { Account } from "../../../store/types";
         password: this.password,
         signIn: false,
       }
-      console.log("hello", account);
       this.$store.dispatch('account/register', account)
     }
   }
