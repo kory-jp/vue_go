@@ -8,7 +8,16 @@ const actions: ActionTree<Account, RootState> = {
       .then((res) => {
         commit(res.data)
       })
-      // .catch((err => console.log(err)))
+      .catch((err) => {
+        console.log(err)
+      })
+  },
+
+  login: async ({commit}, account: Account) => {
+    return accounts.login(account)
+      .then((res) => {
+        commit(res.data)
+      })
       .catch((err) => {
         console.log(err)
       })
