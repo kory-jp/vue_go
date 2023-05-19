@@ -44,6 +44,12 @@ func TestCreateDebug(t *testing.T) {
 	mock := mock_database.NewMockRow(c)
 	mock2 := mock_database.NewMockRow(c)
 	result := mock_database.NewMockResult(c)
+	// ctx := context.Background()
+	// kvs, err := store.NewKVS(ctx)
+	// if err != nil {
+	// 	log.Printf("[ERROR]: %+v", err)
+	// }
+	// fmt.Println(kvs)
 	ctrl := controllers.NewAccountController(sqlhandler)
 	var req *http.Request
 	ac := domain.Account{
@@ -84,6 +90,11 @@ func TestCreate(t *testing.T) {
 	defer c.Finish()
 	sqlhandler := mock_database.NewMockSqlHandler(c)
 	mockInteractor := mock_controllers.NewMockAccountInteractor(c)
+	// ctx := context.Background()
+	// kvs, err := store.NewKVS(ctx)
+	// if err != nil {
+	// 	log.Printf("[ERROR]: %+v", err)
+	// }
 	ctrl := controllers.NewAccountController(sqlhandler)
 	ctrl.Interactor = mockInteractor
 
