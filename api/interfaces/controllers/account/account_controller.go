@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"encoding/json"
-	"io"
-	"net/http"
+	"github.com/kory-jp/vue_go/api/interfaces/controllers"
 
 	"github.com/pkg/errors"
 
@@ -15,12 +13,10 @@ import (
 
 type AccountController struct {
 	Interactor AccountInteractor
-	// KVS        controllers.KVS
 }
 
 func NewAccountController(sqlHandler database.SqlHandler) *AccountController {
 	return &AccountController{
-		// KVS: kvs,
 		Interactor: &usecase.AccountInteractor{
 			AccountRepository: &account.AccountRepository{
 				SqlHandler: sqlHandler,
@@ -29,16 +25,9 @@ func NewAccountController(sqlHandler database.SqlHandler) *AccountController {
 	}
 }
 
-func (controller *AccountController) Create(r *http.Request) (status int, message string, body interface{}, err error) {
-	if r.ContentLength == 0 {
-		return 400, "データ取得に失敗しました", nil, errors.New("データ取得に失敗しました")
-	}
-	bytesAccount, err := io.ReadAll(r.Body)
-	if err != nil {
-		return 400, "データ取得に失敗しました", nil, errors.New(err.Error())
-	}
+func (controller *AccountController) Create(ctx controllers.Context) (status int, message string, body interface{}, err error) {
 	accountType := new(domain.Account)
-	if err := json.Unmarshal(bytesAccount, accountType); err != nil {
+	if err = ctx.ShouldBindJSON(&accountType); err != nil {
 		return 400, "データ取得に失敗しました", nil, errors.New(err.Error())
 	}
 	account, err := controller.Interactor.Add(*accountType)

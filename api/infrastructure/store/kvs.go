@@ -15,13 +15,10 @@ type KVS struct {
 	Cli *redis.Client
 }
 
-func NewKVS(ctx context.Context) (*KVS, error) {
+func NewKVS() (*KVS, error) {
 	cli := redis.NewClient(&redis.Options{
 		Addr: fmt.Sprintf("%s:%s", config.Config.RedisHost, config.Config.RedisPort),
 	})
-	if err := cli.Ping(ctx).Err(); err != nil {
-		return nil, err
-	}
 	return &KVS{Cli: cli}, nil
 }
 
@@ -38,4 +35,12 @@ func (k *KVS) Load(ctx context.Context, key string) (account *domain.Account, er
 		ID: int(id),
 	}
 	return account, nil
+}
+
+func (k *KVS) Expire(ctx context.Context, key string, minitue time.Duration) error {
+	_, err := k.Cli.Expire(ctx, key, minitue*time.Minute).Result()
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	mock_controllers "github.com/kory-jp/vue_go/api/interfaces/controllers/account/mock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -44,12 +46,6 @@ func TestCreateDebug(t *testing.T) {
 	mock := mock_database.NewMockRow(c)
 	mock2 := mock_database.NewMockRow(c)
 	result := mock_database.NewMockResult(c)
-	// ctx := context.Background()
-	// kvs, err := store.NewKVS(ctx)
-	// if err != nil {
-	// 	log.Printf("[ERROR]: %+v", err)
-	// }
-	// fmt.Println(kvs)
 	ctrl := controllers.NewAccountController(sqlhandler)
 	var req *http.Request
 	ac := domain.Account{
@@ -59,6 +55,8 @@ func TestCreateDebug(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(ac)
 	req = httptest.NewRequest("POST", "/register", bytes.NewBuffer(jsonData))
+	var ctx *gin.Context
+	ctx = &gin.Context{Request: req}
 	// --- Store ---
 	result.EXPECT().LastInsertId().Return(int64(1), nil)
 	sqlhandler.EXPECT().Execute(mysql.CreateAccountState, ac.Name, ac.Email, gomock.Any()).Return(result, nil)
@@ -76,7 +74,7 @@ func TestCreateDebug(t *testing.T) {
 	mock2.EXPECT().Next().Return(false)
 	mock2.EXPECT().Err().Return(nil)
 	sqlhandler.EXPECT().Query(mysql.FindAccountState, 1).Return(mock2, nil)
-	status, message, body, err := ctrl.Create(req)
+	status, message, body, err := ctrl.Create(ctx)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -90,11 +88,6 @@ func TestCreate(t *testing.T) {
 	defer c.Finish()
 	sqlhandler := mock_database.NewMockSqlHandler(c)
 	mockInteractor := mock_controllers.NewMockAccountInteractor(c)
-	// ctx := context.Background()
-	// kvs, err := store.NewKVS(ctx)
-	// if err != nil {
-	// 	log.Printf("[ERROR]: %+v", err)
-	// }
 	ctrl := controllers.NewAccountController(sqlhandler)
 	ctrl.Interactor = mockInteractor
 
@@ -146,7 +139,7 @@ func TestCreate(t *testing.T) {
 			responseCode:    400,
 			responseMessage: "データ取得に失敗しました",
 			responseBody:    nil,
-			err:             errors.New("データ取得に失敗しました"),
+			err:             errors.New("EOF"),
 		},
 	}
 
@@ -160,9 +153,11 @@ func TestCreate(t *testing.T) {
 			} else {
 				req = httptest.NewRequest("POST", apiURL, nil)
 			}
+			req.Header.Set("Content-Type", "application/json")
 			tt.prepareAddMockFn(mockInteractor, tt.args)
-
-			code, message, body, err := ctrl.Create(req)
+			var ctx *gin.Context
+			ctx = &gin.Context{Request: req}
+			code, message, body, err := ctrl.Create(ctx)
 			assert.Equal(t, tt.responseCode, code)
 			assert.Equal(t, tt.responseMessage, message)
 			assert.Equal(t, tt.responseBody, body)

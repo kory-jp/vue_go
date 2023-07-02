@@ -5,12 +5,16 @@ import (
 	_ "embed"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/kory-jp/vue_go/api/infrastructure/clock"
+	"github.com/kory-jp/vue_go/api/interfaces/controllers"
 
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwa"
+
+	"github.com/gin-gonic/gin"
 
 	domain "github.com/kory-jp/vue_go/api/domain/account"
 
@@ -35,7 +39,8 @@ type JWTer struct {
 
 type Store interface {
 	Save(ctx context.Context, key string, accountID int) error
-	Load(ctx context.Context, key string) (accountID string, err error)
+	Load(ctx context.Context, key string) (*domain.Account, error)
+	Expire(ctx context.Context, key string, minitue time.Duration) error
 }
 
 func NewJWTer(s Store) (*JWTer, error) {
@@ -63,18 +68,19 @@ func parse(rawKey []byte) (jwk.Key, error) {
 }
 
 const (
-	RoleKey        = "role"
-	AccountNameKye = "account_name"
+	AccountID = "account_id"
+	Email     = "email"
 )
 
-func (j *JWTer) GenerateToken(ctx context.Context, account domain.Account) ([]byte, error) {
+func (j *JWTer) GenerateToken(ctx controllers.Context, account *domain.Account) ([]byte, error) {
 	tok, err := jwt.NewBuilder().
 		JwtID(uuid.New().String()).
 		Issuer(`github.com/kory-jp/vue_go/api`).
 		Subject("access_token").
 		IssuedAt(j.Clocker.Now()).
 		Expiration(j.Clocker.Now().Add(30*time.Minute)).
-		Claim(AccountNameKye, account.Name).
+		Claim(Email, account.Email).
+		Claim(AccountID, account.ID).
 		Build()
 	if err != nil {
 		return nil, fmt.Errorf("GetToken: failed to build token: %w", err)
@@ -106,4 +112,55 @@ func (j *JWTer) GetToken(ctx context.Context, r *http.Request) (jwt.Token, error
 		return nil, fmt.Errorf("GetToken: %q expired: %w", token.JwtID(), err)
 	}
 	return token, nil
+}
+
+type accountID struct{}
+
+func (j *JWTer) SetAccountID(ctx context.Context, aid int) context.Context {
+	return context.WithValue(ctx, accountID{}, aid)
+}
+
+func (j *JWTer) GetAccountID(ctx context.Context) (int, bool) {
+	id, ok := ctx.Value(accountID{}).(int)
+	return id, ok
+}
+
+func (j *JWTer) FillContxet(ctx *gin.Context) error {
+	token, err := j.GetToken(ctx, ctx.Request)
+	if err != nil {
+		return err
+	}
+	if err := jwt.Validate(token, jwt.WithClock(j.Clocker)); err != nil {
+		return fmt.Errorf("GetToken: failed to validate token: %w", err)
+	}
+	id, ok := token.Get(AccountID)
+	if !ok {
+		return fmt.Errorf("not found %s", AccountID)
+	}
+	aid := fmt.Sprintf("%v", id)
+	jwi, err := j.Store.Load(ctx, aid)
+	if err != nil {
+		return err
+	}
+	if string(rune(jwi.ID)) != token.JwtID() {
+		return fmt.Errorf("expired token %s because login another", string(rune(jwi.ID)))
+	}
+	err = j.Store.Expire(ctx, aid, time.Duration(60))
+	if err != nil {
+		return err
+	}
+	intAid, err := strconv.ParseInt(aid, 10, 64)
+	if err != nil {
+		return nil
+	}
+	ctx.Set(AccountID, intAid)
+
+	get, ok := ctx.Get(Email)
+	if !ok {
+		ctx.Set(Email, "")
+		return nil
+	}
+	ctx.Set(Email, get)
+
+	return nil
 }

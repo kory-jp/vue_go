@@ -5,6 +5,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/kory-jp/vue_go/api/utiles/fixture"
 
 	"github.com/golang/mock/gomock"
@@ -24,7 +25,7 @@ func TestEmbed(t *testing.T) {
 }
 
 func TestJWTer_GenerateToken(t *testing.T) {
-	ctx := context.Background()
+	ctx := new(gin.Context)
 	c := gomock.NewController(t)
 	defer c.Finish()
 	ms := mock_auth.NewMockStore(c)
@@ -54,7 +55,7 @@ func TestJWTer_GenerateToken(t *testing.T) {
 				t.Fatal(err)
 			}
 			tt.prepareStoreMockFn(ms, ctx, string(rawPubKey), tt.args.ID)
-			got, err := sut.GenerateToken(ctx, *tt.args)
+			got, err := sut.GenerateToken(ctx, tt.args)
 			if err != nil {
 				t.Fatalf("not want err: %v", err)
 			}
