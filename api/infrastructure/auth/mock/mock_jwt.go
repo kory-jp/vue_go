@@ -7,8 +7,10 @@ package mock_auth
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	gomock "github.com/golang/mock/gomock"
+	domain "github.com/kory-jp/vue_go/api/domain/account"
 )
 
 // MockStore is a mock of Store interface.
@@ -34,11 +36,25 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// Expire mocks base method.
+func (m *MockStore) Expire(ctx context.Context, key string, minitue time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Expire", ctx, key, minitue)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Expire indicates an expected call of Expire.
+func (mr *MockStoreMockRecorder) Expire(ctx, key, minitue interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Expire", reflect.TypeOf((*MockStore)(nil).Expire), ctx, key, minitue)
+}
+
 // Load mocks base method.
-func (m *MockStore) Load(ctx context.Context, key string) (string, error) {
+func (m *MockStore) Load(ctx context.Context, key string) (*domain.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Load", ctx, key)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*domain.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
