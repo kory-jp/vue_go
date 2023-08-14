@@ -9,14 +9,14 @@ type AuthInteractor struct {
 	AuthRepository AuthRepository
 }
 
-func (interactor *AuthInteractor) Auth(ac domain.Account) error {
+func (interactor *AuthInteractor) Auth(ac domain.Account) (*domain.Account, error) {
 	account, err := interactor.AuthRepository.GetByEmail(ac.Email)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(ac.Password))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return account, nil
 }

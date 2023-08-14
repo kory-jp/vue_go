@@ -15,3 +15,5 @@ memo.txt
 *.rdb
 
 api/infrastructure/auth/cert/*
+
+cookie.txt

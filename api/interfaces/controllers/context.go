@@ -1,6 +1,8 @@
 package controllers
 
-import "time"
+import (
+	"time"
+)
 
 type Context interface {
 	ShouldBindJSON(obj interface{}) error
@@ -8,5 +10,7 @@ type Context interface {
 	BindJSON(obj interface{}) error
 	Deadline() (deadline time.Time, ok bool)
 	Err() error
-	Value(key interface{}) interface{}
+	// Value(key interface{}) interface{}
+	Value(key any) any
+	SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool)
 }

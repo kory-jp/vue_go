@@ -40,17 +40,34 @@ func (res *Response) setResp(c *gin.Context, handler func(c controllers.Context)
 	fmt.Fprintln(c.Writer, resStr)
 }
 
-func (res *Response) setLoginResp(c *gin.Context, jwter *auth.JWTer, handler func(c controllers.Context, jwter controllers.JWTer) (status int, message string, body interface{}, err error)) {
-	status, mess, body, err := handler(c, jwter)
+func (res *Response) setLoginResp(c *gin.Context, jwter *auth.JWTer, handler func(c controllers.Context, jwter controllers.JWTer) (status int, message string, err error)) {
+	status, mess, err := handler(c, jwter)
 	if err != nil {
 		if e, ok := err.(fmt.Formatter); ok {
 			log.Printf("[ERROR]: %+v\n\n", e)
 		}
 	}
-	response := &Response{status, mess, body}
-	jsonData, _ := json.Marshal(response)
-	resStr := string(jsonData)
-	fmt.Fprintln(c.Writer, resStr)
+	c.JSON(http.StatusOK, gin.H{
+		"message": mess,
+		"status":  status,
+	})
+}
+
+func (res *Response) setLogoutResp(c *gin.Context, jwter *auth.JWTer, handler func(c controllers.Context, jwter controllers.JWTer, tokenID string) (status int, message string, err error)) {
+	token, err := jwter.GetToken(c, c.Request)
+	if err != nil {
+		log.Printf("[ERROR]: %+v\n\n", err)
+	}
+	status, mess, err := handler(c, jwter, token.JwtID())
+	if err != nil {
+		if e, ok := err.(fmt.Formatter); ok {
+			log.Printf("[ERROR]: %+v\n\n", e)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": mess,
+		"status":  status,
+	})
 }
 
 func Init() {
@@ -90,6 +107,10 @@ func Init() {
 
 	authRouter := r.Group("api/v1").Use(middleware.AuthMiddleware(jwter))
 
+	authRouter.DELETE("/logout", func(c *gin.Context) {
+		new(Response).setLogoutResp(c, jwter, loginController.Logout)
+	})
+
 	authRouter.GET("/tasks", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Get Tasks!",
@@ -97,5 +118,4 @@ func Init() {
 	})
 
 	r.Run(":8000")
-
 }

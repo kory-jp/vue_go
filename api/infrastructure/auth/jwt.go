@@ -41,6 +41,7 @@ type Store interface {
 	Save(ctx context.Context, key string, accountID int) error
 	Load(ctx context.Context, key string) (*domain.Account, error)
 	Expire(ctx context.Context, key string, minitue time.Duration) error
+	Delete(ctx context.Context, key string) error
 }
 
 func NewJWTer(s Store) (*JWTer, error) {
@@ -95,7 +96,7 @@ func (j *JWTer) GenerateToken(ctx controllers.Context, account *domain.Account) 
 	return signed, nil
 }
 
-func (j *JWTer) GetToken(ctx context.Context, r *http.Request) (jwt.Token, error) {
+func (j *JWTer) GetToken(ctx controllers.Context, r *http.Request) (jwt.Token, error) {
 	token, err := jwt.ParseRequest(
 		r,
 		jwt.WithKey(jwa.RS256, j.PublicKey),
@@ -107,7 +108,6 @@ func (j *JWTer) GetToken(ctx context.Context, r *http.Request) (jwt.Token, error
 	if err := jwt.Validate(token, jwt.WithClock(j.Clocker)); err != nil {
 		return nil, fmt.Errorf("get token: falied to validate token: %w", err)
 	}
-
 	if _, err := j.Store.Load(ctx, token.JwtID()); err != nil {
 		return nil, fmt.Errorf("GetToken: %q expired: %w", token.JwtID(), err)
 	}
@@ -120,9 +120,13 @@ func (j *JWTer) SetAccountID(ctx context.Context, aid int) context.Context {
 	return context.WithValue(ctx, accountID{}, aid)
 }
 
-func (j *JWTer) GetAccountID(ctx context.Context) (int, bool) {
-	id, ok := ctx.Value(accountID{}).(int)
-	return id, ok
+func (j *JWTer) GetAccountID(ctx controllers.Context) int {
+	aid := ctx.Value(AccountID)
+	v, ok := aid.(int64)
+	if !ok {
+		return 0
+	}
+	return int(v)
 }
 
 func (j *JWTer) FillContxet(ctx *gin.Context) error {
@@ -138,11 +142,12 @@ func (j *JWTer) FillContxet(ctx *gin.Context) error {
 		return fmt.Errorf("not found %s", AccountID)
 	}
 	aid := fmt.Sprintf("%v", id)
-	jwi, err := j.Store.Load(ctx, aid)
+	jwi, err := j.Store.Load(ctx, token.JwtID())
 	if err != nil {
 		return err
 	}
-	if string(rune(jwi.ID)) != token.JwtID() {
+	jwiID := fmt.Sprintf("%v", jwi.ID)
+	if jwiID != aid {
 		return fmt.Errorf("expired token %s because login another", string(rune(jwi.ID)))
 	}
 	err = j.Store.Expire(ctx, aid, time.Duration(60))
@@ -162,5 +167,12 @@ func (j *JWTer) FillContxet(ctx *gin.Context) error {
 	}
 	ctx.Set(Email, get)
 
+	return nil
+}
+
+func (j *JWTer) DeleteAccountID(ctx controllers.Context, key string) error {
+	if err := j.Store.Delete(ctx, key); err != nil {
+		return err
+	}
 	return nil
 }

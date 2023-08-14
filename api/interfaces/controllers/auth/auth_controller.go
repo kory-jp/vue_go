@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	ErrMessage     = "データ取得に失敗しました"
-	SuccessMessage = "ログインに成功しました"
+	ErrMessage           = "データ取得に失敗しました"
+	SuccessLoginMessage  = "ログインに成功しました"
+	SuccessLogoutMessage = "ログアウトに成功しました"
 )
 
 type AuthController struct {
@@ -30,27 +31,26 @@ func NewAuthController(sqlHandler database.SqlHandler) *AuthController {
 	}
 }
 
-func (controller *AuthController) Login(ctx controllers.Context, jwter controllers.JWTer) (status int, message string, body interface{}, err error) {
+func (controller *AuthController) Login(ctx controllers.Context, jwter controllers.JWTer) (status int, message string, err error) {
 	account := new(domain.Account)
 	if err = ctx.ShouldBindJSON(&account); err != nil {
-		return 400, ErrMessage, nil, errors.New(err.Error())
+		return 400, ErrMessage, errors.New(err.Error())
 	}
-	if err = controller.Interactor.Auth(*account); err != nil {
-		return 400, ErrMessage, nil, errors.New(err.Error())
+	account, err = controller.Interactor.Auth(*account)
+	if err != nil {
+		return 400, ErrMessage, errors.New(err.Error())
 	}
 	jwt, err := jwter.GenerateToken(ctx, account)
 	if err != nil {
-		return 400, ErrMessage, nil, errors.New(err.Error())
+		return 400, ErrMessage, errors.New(err.Error())
 	}
-	return 200, SuccessMessage, jwt, nil
+	ctx.SetCookie("token", string(jwt), 60, "/", "http://localhost", false, true)
+	return 200, SuccessLoginMessage, nil
 }
 
-// func (controller *AuthController) Logout(ctx controllers.Context, jwter controllers.JWTer) (status int, message string, body interface{}, err error) {
-// 	accountId, ok := jwter.GetAccountID(ctx)
-// 	if !ok {
-// 		return 400, ErrMessage, nil, nil
-// 	}
-// 	aid := accountId.(domain.Account.ID)
-
-// 	if err :=
-// }
+func (controller *AuthController) Logout(ctx controllers.Context, jwter controllers.JWTer, tokenID string) (status int, message string, err error) {
+	if err = jwter.DeleteAccountID(ctx, tokenID); err != nil {
+		return 400, ErrMessage, err
+	}
+	return 200, SuccessLogoutMessage, nil
+}
