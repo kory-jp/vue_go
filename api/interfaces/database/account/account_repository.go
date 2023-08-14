@@ -43,9 +43,14 @@ func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, e
 		password   string
 		created_at time.Time
 	)
-	row.Next()
-	if err = row.Scan(&id, &name, &email, &password, &created_at); err != nil {
-		return nil, err
+	for row.Next() {
+		if err = row.Scan(&id, &name, &email, &password, &created_at); err != nil {
+			return nil, err
+		}
+	}
+	err = row.Err()
+	if err != nil {
+		return nil, errors.New(err.Error())
 	}
 	user = &domain.Account{
 		ID:        id,
@@ -62,15 +67,21 @@ func (repo *AccountRepository) FindById(identifier int) (user *domain.Account, e
 
 func (repo *AccountRepository) FindByEmail(email string) (numberAccount int, err error) {
 	// TODO: rowの詳細を確認
+	wrongNumber := 999
 	row, err := repo.Query(mysql.GetNumberAccountState, email)
 	if err != nil {
-		return 0, err
+		return wrongNumber, err
 	}
 	defer row.Close()
-	row.Next()
-	err = row.Scan(&numberAccount)
+	for row.Next() {
+		err = row.Scan(&numberAccount)
+		if err != nil {
+			return wrongNumber, errors.New(err.Error())
+		}
+	}
+	err = row.Err()
 	if err != nil {
-		return 0, errors.New(err.Error())
+		return wrongNumber, errors.New(err.Error())
 	}
 	return numberAccount, nil
 }

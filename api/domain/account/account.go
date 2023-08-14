@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/go-playground/validator"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
@@ -18,10 +18,13 @@ type Account struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-func (ac Account) Encrypt(plaintext string) (hash string) {
-	byteHash, _ := bcrypt.GenerateFromPassword([]byte(plaintext), bcrypt.DefaultCost)
+func (ac Account) Encrypt(plaintext string) (hash string, err error) {
+	byteHash, err := bcrypt.GenerateFromPassword([]byte(plaintext), bcrypt.DefaultCost)
+	if err != nil {
+		return "", errors.New(err.Error())
+	}
 	hash = string(byteHash)
-	return hash
+	return hash, nil
 }
 
 func (ac Account) TranslateUsersField(field string) (value string) {

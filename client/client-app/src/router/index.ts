@@ -4,6 +4,7 @@ import HomeView from '../views/HomeView.vue'
 import Top from '../components/pages/Top.vue'
 import Login from '@/components/pages/auth/Login.vue'
 import Register from '@/components/pages/auth/Register.vue'
+import Articles from '@/components/pages/articles/Articles.vue'
 
 Vue.use(VueRouter)
 
@@ -22,6 +23,11 @@ const routes: Array<RouteConfig> = [
     path: '/login',
     name: 'login',
     component: Login
+  },
+  {
+    path: '/articles',
+    name: 'articles',
+    component: Articles
   }
 ]
 

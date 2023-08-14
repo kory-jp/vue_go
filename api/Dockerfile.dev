@@ -3,15 +3,9 @@ FROM golang:1.18.3-alpine
 WORKDIR /app/api
 COPY ./ /app/api
 RUN export GOPATH= && export GO111MODULE=on
-ENV GO_ENV developemnt
+ENV GO_ENV development
 RUN apk upgrade --update && \
-  apk --no-cache add git gcc musl-dev
-# RUN go install github.com/go-sql-driver/mysql@latest && \
-#   go install github.com/cosmtrek/air@latest && \
-#   go build -o /go/bin/air github.com/cosmtrek/air
-# RUN go install github.com/go-delve/delve/cmd/dlv && \
-#   go build -o /go/bin/dlv github.com/go-delve/delve/cmd/dlv
-
+  apk --no-cache add git gcc musl-dev make
 RUN go get github.com/go-sql-driver/mysql@latest
 RUN go install github.com/cosmtrek/air@latest
 RUN go install github.com/go-delve/delve/cmd/dlv@latest

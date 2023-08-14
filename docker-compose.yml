@@ -45,8 +45,6 @@ services:
     depends_on:
       - mysql
     tty: true
-    security_opt:
-      - apparmor:unconfined
     cap_add:
       - SYS_PTRACE
 
@@ -62,3 +60,12 @@ services:
     depends_on:
       - api
       - client
+  
+  redis:
+    image: "redis:7.0.11-alpine"
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./redis/redis_data:/data"
+      - "./redis/redis.conf:/etc/redis.conf"
